@@ -1,0 +1,140 @@
+<form theme="dark">
+  <label>Dashboard</label>
+  <fieldset submitButton="true" autoRun="true">
+    <input type="time" token="time_range" searchWhenChanged="false">
+      <label>Time Window</label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="Project" searchWhenChanged="false">
+      <label>Project</label>
+      <choice value="*">All</choice>
+      <choice value="None">All</choice>
+      <search>
+        <query>index="jira_data" | dedup fields.project.name | stats count by fields.project.name</query>
+        <earliest>$time_range.earliest$</earliest>
+        <latest>$time_range.latest$</latest>
+      </search>
+      <fieldForLabel>fields.project.name</fieldForLabel>
+      <fieldForValue>fields.project.name</fieldForValue>
+      <delimiter> OR </delimiter>
+      <initialValue>*</initialValue>
+      <valuePrefix>fields.project.name="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+    </input>
+    <input type="dropdown" token="Assignee" searchWhenChanged="false">
+      <label>Assignee</label>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <choice value="None">All</choice>
+      <search>
+        <query>index="jira_data" | dedup fields.assignee.name | stats count by  fields.assignee.name</query>
+        <earliest>$time_range.earliest$</earliest>
+        <latest>$time_range.latest$</latest>
+      </search>
+      <fieldForLabel>fields.assignee.name</fieldForLabel>
+      <fieldForValue>fields.assignee.name</fieldForValue>
+    </input>
+    <input type="dropdown" token="Reporter" searchWhenChanged="false">
+      <label>Reporter</label>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <choice value="None">All</choice>
+      <search>
+        <query>index="jira_data" |dedup fields.reporter.name | stats count by fields.reporter.name</query>
+        <earliest>$time_range.earliest$</earliest>
+        <latest>$time_range.latest$</latest>
+      </search>
+      <fieldForLabel>fields.reporter.name</fieldForLabel>
+      <fieldForValue>fields.reporter.name</fieldForValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Total Issues</title>
+        <search>
+          <query>index="jira_data" $Project$ fields.assignee.name="$Assignee$" fields.reporter.name="$Reporter$" | stats sum(linecount) as Total</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">radialGauge</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Priority</title>
+        <search>
+          <query>index="jira_data" $Project$ fields.assignee.name="$Assignee$" fields.reporter.name="$Reporter$"  | dedup fields.priority.name | stats count by fields.priority.name</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="height">280</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Issue Type</title>
+        <search>
+          <query>index="jira_data" $Project$ fields.assignee.name="$Assignee$" fields.reporter.name="$Reporter$" |dedup fields.issuetype.name | stats count by fields.issuetype.name</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">all</option>
+        <option name="height">280</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Components</title>
+        <search>
+          <query>index="jira_data" $Project$ fields.assignee.name="$Assignee$" fields.reporter.name="$Reporter$" | dedup fields.components{}.name | stats count by fields.components{}.name</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">all</option>
+        <option name="height">295</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Labels</title>
+        <search>
+          <query>index="jira_data" $Project$ fields.assignee.name="$Assignee$" fields.reporter.name="$Reporter$"  | dedup fields.labels{} | stats count by fields.labels{}</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+        <option name="height">294</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Status</title>
+        <search>
+          <query>index="jira_data" $Project$ fields.assignee.name="$Assignee$" fields.reporter.name="$Reporter$" |dedup fields.status.name | stats count by fields.status.name</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">all</option>
+        <option name="height">293</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>
